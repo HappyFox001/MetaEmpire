@@ -13,14 +13,9 @@ contract AIOracleTest is Test {
     address public user = address(0x123);
 
     function setUp() public {
-        // First, deploy the AIOracle with a dummy address for WorldRecord
         aiOracle = new AIOracle(address(1));
-        
-        // Then deploy WorldRecord with the real AIOracle address
         worldRecord = new WorldRecord(address(aiOracle));
-        
-        // Now make AIOracle point to the real WorldRecord by updating the reference
-        vm.startPrank(ai);  // Since ai is address(this), the owner of aiOracle
+        vm.startPrank(ai);
         aiOracle.setWorldRecord(address(worldRecord));
         vm.stopPrank();
     }
