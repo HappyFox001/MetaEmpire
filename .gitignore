@@ -1,1 +1,4 @@
 .venv
+action.txt
+backend/__pycache__
+.env
