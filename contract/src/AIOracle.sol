@@ -12,13 +12,9 @@ contract AIOracle {
         _;
     }
 
-    constructor(address _worldRecord) {
+    constructor() {
         owner = msg.sender;
-        worldRecord = WorldRecord(_worldRecord);
-    }
-
-    function setWorldRecord(address _worldRecord) external onlyOwner {
-        worldRecord = WorldRecord(_worldRecord);
+        worldRecord = new WorldRecord(msg.sender);
     }
 
     function submitAnalysis(

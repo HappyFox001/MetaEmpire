@@ -13,10 +13,9 @@ contract AIOracleTest is Test {
     address public user = address(0x123);
 
     function setUp() public {
-        aiOracle = new AIOracle(address(1));
+        aiOracle = new AIOracle();
         worldRecord = new WorldRecord(address(aiOracle));
         vm.startPrank(ai);
-        aiOracle.setWorldRecord(address(worldRecord));
         vm.stopPrank();
     }
 
