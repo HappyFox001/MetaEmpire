@@ -42,9 +42,6 @@ contract WorldRecord {
         string  liberalism;
     }
 
-    /*───────────────────────*
-     *     存储变量 / 事件     *
-     *───────────────────────*/
     mapping(bytes32 => Opinion) public opinions;
     mapping(address  => Civilian) public civilians;
     mapping(uint256  => Topic)    public topics;
@@ -69,6 +66,18 @@ contract WorldRecord {
     }
     constructor(address _aiOracle) {
         aiOracle = _aiOracle;
+        
+
+        nextTopicId = 1;
+        topics[1] = Topic({
+            id: 1,
+            content: "Default Topic",
+            priority: "medium",
+            urgency: "normal",
+            relatedOpinions: new bytes32[](0),
+            summary: "Default topic for system operations"
+        });
+
         string[20] memory preset = [
             unicode"特朗普提出的对华关税把全球供应链推向重新洗牌。",
             unicode"提高钢铝关税短期保护了美国制造业，却抬高了国内成本。",
@@ -93,7 +102,8 @@ contract WorldRecord {
         ];
 
         for (uint i = 0; i < preset.length; i++) {
-            _addOpinionInternal(preset[i]);
+            bytes32 opinionHash = _addOpinionInternal(preset[i]);
+            topics[1].relatedOpinions.push(opinionHash);
         }
     }
 
