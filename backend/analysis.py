@@ -36,29 +36,18 @@ logger = logging.getLogger(__name__)
 
 async def analyze_topics_and_sentiment(opinions: List[str]) -> Dict[str, Any]:
     prompt = PromptTemplate.from_template(
-        "以下是用户观点：\n\n{opinions}\n\n"
-        "请完成以下任务，答案必须是 **有效 JSON**，字段名为英文：\n"
-        "1. **自动抽取主题**：自行归纳每条观点所属的主题关键词（无需预设列表，可多选）。\n"
-        "2. **情感分析**：判定每条观点的情感极性（positive / negative / neutral）。\n"
-        "3. **主题分布**：计算各主题出现的百分比（总和=100）。\n"
-        "4. **主主题**：指出出现最多的主题。\n\n"
-        "输出示例：\n"
-        "{{\n"
-        "  'sentiment_analysis': {{'positive': 40, 'negative': 20, 'neutral': 40}},\n"
-        "  'topic_distribution': {{'AI': 35, 'Web3': 25, 'Economy': 40}},\n"
-        "  'main_topic': 'Economy'\n"
-        "}}\n"
-        "仅返回 JSON，不要额外说明。"
+        "请分析以下用户观点，并直接返回主要意图和情感倾向：\n\n"
+        "观点：\n{opinions}\n\n"
+        "请用1-2句话总结主要意图，并判断整体情感倾向（积极/中立/消极）"
     )
 
     try:
         resp = await llm.ainvoke(prompt.format(opinions="\n\n".join(opinions)))
         text = resp if isinstance(resp, str) else resp.content
-        return json.loads(text.replace("'", '"'))
+        logger.debug(f"Analysis result: {text}")
+
+        return text
+        
     except Exception as e:
-        logger.error(f"Error parsing analysis result: {str(e)}")
-        return {
-            "sentiment_analysis": {"positive": 33, "negative": 33, "neutral": 34},
-            "topic_distribution": {},
-            "main_topic": "Uncategorized"
-        }
+        logger.error(f"Error in analysis: {str(e)}")
+        return "无法完成分析，请稍后再试。"

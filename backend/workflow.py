@@ -165,7 +165,7 @@ class WorkflowManager:
                 task_id,
                 "ai_fetching",
                 "complete",
-                f"已收集到 {len(opinion_contents) + 10} 条相关观点",
+                f"已收集到 {len(opinion_contents)} 条相关观点",
                 1
             )
             
@@ -187,16 +187,11 @@ class WorkflowManager:
             )
 
             analysis_result = await analyze_topics_and_sentiment(opinion_contents)
-            
-            sentiment_analysis = analysis_result['sentiment_analysis']
-            topic_distribution = analysis_result['topic_distribution']
-            main_topic = analysis_result['main_topic']
-
             await WorkflowManager._update_with_delay(
                 task_id,
                 "ai_analyzing",
                 "complete",
-                f"分析完成，主要话题：{main_topic}，积极观点占比 {sentiment_analysis['positive']}%",
+                analysis_result,
                 1
             )
 
@@ -235,25 +230,23 @@ class WorkflowManager:
                 task_id,
                 "ai_recommendation",
                 "complete",
-                recommendations[:100] + "...",
+                recommendations,
                 0.5
             )
 
+            completion_message = "完成分析"
+            
             await WorkflowManager._update_with_delay(
                 task_id, 
                 "complete", 
                 "complete", 
-                "分析完成，请查看详细报告", 
+                completion_message,
                 0.5
             )
 
             task.result = {
                 "summary": summary,
                 "recommendations": recommendations,
-                "sentiment_analysis": sentiment_analysis,
-                "topic_distribution": topic_distribution,
-                "key_topics": key_topics,
-                "main_topic": main_topic,
                 "total_opinions": len(opinion_contents)
             }
 
