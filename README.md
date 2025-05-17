@@ -50,7 +50,7 @@ MetaEmpire 是一个创新的去中心化治理平台，结合了区块链技术
 
 1. 克隆仓库
 ```bash
-git clone https://github.com/your-username/MetaEmpire.git
+git clone https://github.com/HappyFox001/MetaEmpire.git
 cd MetaEmpire
 chmod +x start.sh
 ```
