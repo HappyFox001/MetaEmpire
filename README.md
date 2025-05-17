@@ -52,11 +52,14 @@ MetaEmpire 是一个创新的去中心化治理平台，结合了区块链技术
 ```bash
 git clone https://github.com/your-username/MetaEmpire.git
 cd MetaEmpire
+chmod +x start.sh
 ```
 
 2. 安装后端依赖
 ```bash
 cd backend
+conda create -n test python=3.10
+conda activate test
 pip install -r requirements.txt
 ```
 
@@ -71,24 +74,8 @@ pnpm install
 
 5. 启动开发服务器
 ```bash
-# 启动后端
-cd ../backend
-uvicorn api:app --reload
-
-# 启动前端 (新终端)
-cd ../frontend
-pnpm dev
-
-# 启动 anvil(新终端)
-cd ../contract
-anvil
-
-# 合约本地部署(新终端)
-forge build
-forge create src/AIOracle.sol:AIOracle \
-  --rpc-url http://localhost:8545 \
-  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
-  --broadcast
+conda activate test
+./start.sh
 ```
 
 ## 📚 项目结构
