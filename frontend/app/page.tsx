@@ -7,21 +7,22 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 const getTopicStyles = (title: string): { textColor: string; bgColor: string; borderColor: string; glowColor: string; icon: string } => {
-  if (title.includes('经济')) return { textColor: 'text-emerald-400', bgColor: 'bg-emerald-950/30', borderColor: 'border-emerald-800', glowColor: 'emerald', icon: '📈' };
-  if (title.includes('AI')) return { textColor: 'text-blue-400', bgColor: 'bg-blue-950/30', borderColor: 'border-blue-800', glowColor: 'blue', icon: '🤖' };
-  if (title.includes('Web3')) return { textColor: 'text-purple-400', bgColor: 'bg-purple-950/30', borderColor: 'border-purple-800', glowColor: 'purple', icon: '🔗' };
-  if (title.includes('数字货币')) return { textColor: 'text-amber-400', bgColor: 'bg-amber-950/30', borderColor: 'border-amber-800', glowColor: 'amber', icon: '💰' };
-  if (title.includes('元宇宙')) return { textColor: 'text-pink-400', bgColor: 'bg-pink-950/30', borderColor: 'border-pink-800', glowColor: 'pink', icon: '🌌' };
-  if (title.includes('版权')) return { textColor: 'text-red-400', bgColor: 'bg-red-950/30', borderColor: 'border-red-800', glowColor: 'red', icon: '©️' };
-  return { textColor: 'text-gray-200', bgColor: 'bg-gray-900/60', borderColor: 'border-gray-800', glowColor: 'gray', icon: '💬' }; // 默认颜色
+  if (title.includes("经济")) return { textColor: "text-emerald-400", bgColor: "bg-emerald-950/30", borderColor: "border-emerald-800", glowColor: "emerald", icon: "📈" };
+  if (title.includes("AI")) return { textColor: "text-blue-400", bgColor: "bg-blue-950/30", borderColor: "border-blue-800", glowColor: "blue", icon: "🤖" };
+  if (title.includes("Web3")) return { textColor: "text-purple-400", bgColor: "bg-purple-950/30", borderColor: "border-purple-800", glowColor: "purple", icon: "🔗" };
+  if (title.includes("数字货币")) return { textColor: "text-amber-400", bgColor: "bg-amber-950/30", borderColor: "border-amber-800", glowColor: "amber", icon: "💰" };
+  if (title.includes("元宇宙")) return { textColor: "text-pink-400", bgColor: "bg-pink-950/30", borderColor: "border-pink-800", glowColor: "pink", icon: "🌌" };
+  if (title.includes("版权")) return { textColor: "text-red-400", bgColor: "bg-red-950/30", borderColor: "border-red-800", glowColor: "red", icon: "©️" };
+  return { textColor: "text-gray-200", bgColor: "bg-gray-900/60", borderColor: "border-gray-800", glowColor: "gray", icon: "💬" }; // 默认颜色
 };
 
 const getHeatIndicator = (heat: number): string => {
-  if (heat >= 1000) return '🔥🔥🔥';
-  if (heat >= 700) return '🔥🔥';
-  return '🔥';
+  if (heat >= 1000) return "🔥🔥🔥";
+  if (heat >= 700) return "🔥🔥";
+  return "🔥";
 };
 
 const getSupportRatio = (support: number, oppose: number) => {
@@ -155,24 +156,24 @@ const getRandomOpinion = () => {
   const randomIndex = Math.floor(Math.random() * opinionPool.length);
   const randomUserNumber = Math.floor(Math.random() * 1000);
   const now = new Date();
-  const timestamp = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+  const timestamp = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
 
   return {
     user: `匿名用户${randomUserNumber}`,
     content: opinionPool[randomIndex].content,
     timestamp,
-    id: `${Date.now()}-${Math.random()}`
+    id: `${Date.now()}-${Math.random()}`,
   };
 };
 
 export default function HomePage() {
-  const [userInput, setUserInput] = useState('');
+  const [userInput, setUserInput] = useState("");
   const [animatedTopics, setAnimatedTopics] = useState<Topic[]>(() => 
     mockTopics.map(topic => ({
       ...topic,
       animatedSupport: topic.support,
-      animatedOppose: topic.oppose
-    }))
+      animatedOppose: topic.oppose,
+    })),
   );
   const [opinions, setOpinions] = useState<{ id: string; content: string; user: string; timestamp: string; }[]>([]);
 
@@ -186,9 +187,9 @@ export default function HomePage() {
           return {
             ...topic,
             animatedSupport: Math.max(0, topic.support + supportFluctuation),
-            animatedOppose: Math.max(0, topic.oppose + opposeFluctuation)
+            animatedOppose: Math.max(0, topic.oppose + opposeFluctuation),
           };
-        })
+        }),
       );
     }, 2000);
 
@@ -227,7 +228,7 @@ export default function HomePage() {
           <span className="text-blue-400 font-bold text-xl tracking-wide">MetaEmpire</span>
           <span className="ml-3 text-sm text-gray-400">AI·经济·Web3热点</span>
         </div>
-        <Button variant="outline" className="rounded-full px-4 text-blue-400 border-blue-700 hover:bg-blue-900/10 hover:border-blue-400 transition">我的话题</Button>
+        <Button variant="outline" className="rounded-full px-4 text-blue-300 border-blue-700 hover:bg-blue-900/30 hover:text-white hover:border-blue-400 transition">我的话题</Button>
       </header>
 
       <main className="flex min-h-[calc(100vh-64px)]">
@@ -260,49 +261,55 @@ export default function HomePage() {
                   const topic = animatedTopics[0] || mockTopics[0];
                   const styles = getTopicStyles(topic.title);
                   return (
-                    <Card className={`h-full flex flex-col justify-between transition-all cursor-pointer border-2 ${styles.borderColor} ${styles.bgColor} shadow-md hover:shadow-xl hover:scale-[1.01] relative overflow-hidden group`}>
-                      <div className="absolute top-0 left-0 w-full h-10 flex items-center justify-between px-3">
-                        <div className="flex items-center text-red-400 text-sm font-medium">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                          </svg>
-                          {topic.animatedSupport || topic.support}
-                        </div>
-                        <div className="flex items-center text-blue-400 text-sm font-medium">
-                          {topic.animatedOppose || topic.oppose}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="absolute top-10 left-0 w-full h-1.5 flex bg-blue-500/30">
-                        <div 
-                          className="h-full bg-red-500 transition-all duration-300" 
-                          style={{ 
-                            width: `${getSupportRatio(
-                              topic.animatedSupport || topic.support, 
-                              topic.animatedOppose || topic.oppose
-                            )}%` 
-                          }} 
-                        />
-                      </div>
-                      <div className={`absolute top-1.5 left-0 w-1 h-[calc(100%-0.375rem)] ${styles.bgColor} ${styles.borderColor}`}></div>
-                      <div className="absolute bottom-0 right-0 w-48 h-48 bg-gradient-to-tr from-white/0 to-gray-500/30 rounded-full blur-3xl opacity-20 group-hover:opacity-35 transition-opacity"></div>
-                      <CardContent className="p-6 relative z-10">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">{styles.icon}</span>
-                            <h2 className={`text-3xl font-extrabold ${styles.textColor} tracking-tight leading-snug`}>{mockTopics[0].title}</h2>
+                    <Link href="/dashboard" className="h-full block">
+                      <Card className={`h-full flex flex-col justify-between transition-all cursor-pointer border-2 ${styles.borderColor} ${styles.bgColor} shadow-md hover:shadow-xl hover:scale-[1.01] relative overflow-hidden group`}>
+
+                        <div className="absolute inset-0 bg-[url('/image.png')] bg-cover bg-center brightness-[0.3] opacity-90 z-0 pointer-events-none"></div>
+
+                        <div className="absolute top-0 left-0 w-full h-10 flex items-center justify-between px-3 z-10">
+                          <div className="flex items-center text-red-400 text-sm font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                            </svg>
+                            {topic.animatedSupport || topic.support}
                           </div>
-                          <Badge variant="outline" className={`text-sm ${styles.textColor} ${styles.borderColor} bg-gray-900/40`}>{mockTopics[0].status}</Badge>
+                          <div className="flex items-center text-blue-400 text-sm font-medium">
+                            {topic.animatedOppose || topic.oppose}
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
+                            </svg>
+                          </div>
                         </div>
-                        <p className="text-base text-gray-300 mb-6 leading-relaxed">{mockTopics[0].description}</p>
-                        <div className="text-sm font-medium flex items-center gap-1">
-                          <span className="text-orange-400">{getHeatIndicator(mockTopics[0].heat)}</span>
-                          <span className="text-gray-400">热度：{mockTopics[0].heat.toLocaleString()}</span>
+
+                        <div className="absolute top-10 left-0 w-full h-1.5 flex bg-blue-500/30 z-10">
+                          <div 
+                            className="h-full bg-red-500 transition-all duration-300" 
+                            style={{ width: `${getSupportRatio(topic.animatedSupport || topic.support, topic.animatedOppose || topic.oppose)}%` }} 
+                          />
                         </div>
-                      </CardContent>
-                    </Card>
+
+                        <div className={`absolute top-1.5 left-0 w-1 h-[calc(100%-0.375rem)] ${styles.bgColor} ${styles.borderColor} z-10`}></div>
+
+                        <div className="absolute bottom-0 right-0 w-48 h-48 bg-gradient-to-tr from-white/0 to-gray-500/30 rounded-full blur-3xl opacity-20 group-hover:opacity-35 transition-opacity z-10"></div>
+
+                        <CardContent className="p-6 relative z-10">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl">{styles.icon}</span>
+                              <h2 className={`text-3xl font-extrabold ${styles.textColor} tracking-tight leading-snug`}>{topic.title}</h2>
+                            </div>
+                            <Badge variant="outline" className={`text-sm ${styles.textColor} ${styles.borderColor} bg-gray-900/40`}>{topic.status}</Badge>
+                          </div>
+                          <p className="text-base text-gray-300 mb-6 leading-relaxed">{topic.description}</p>
+                          <div className="text-sm font-medium flex items-center gap-1">
+                            <span className="text-orange-400">{getHeatIndicator(topic.heat)}</span>
+                            <span className="text-gray-400">热度：{topic.heat.toLocaleString()}</span>
+                          </div>
+                        </CardContent>
+
+                      </Card>
+                    </Link>
+
                   );
                 })()}
               </motion.div>
@@ -424,9 +431,9 @@ export default function HomePage() {
                   <motion.div
                     key={opinion.id}
                     initial={{ opacity: 0, y: -20, height: 0 }}
-                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    animate={{ opacity: 1, y: 0, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     className="border border-gray-800 rounded-lg p-4 hover:bg-blue-900/10 transition-all duration-300 shadow-sm bg-gray-900/70"
                   >
                     <div className="flex items-center justify-between mb-1">
@@ -442,8 +449,8 @@ export default function HomePage() {
           <form onSubmit={(e) => {
             e.preventDefault();
             if (userInput.trim()) {
-              localStorage.setItem('metaempire_pending_message', userInput);
-              window.location.href = '/process';
+              localStorage.setItem("metaempire_pending_message", userInput);
+              window.location.href = "/process";
             }
           }} className="flex flex-col gap-3 border-t pt-4 border-gray-800">
             <Input 
@@ -463,8 +470,8 @@ export default function HomePage() {
               <Button 
                 type="button" 
                 variant="outline" 
-                className="border-blue-700 text-blue-400 hover:bg-blue-900/10 flex items-center gap-1"
-                onClick={() => window.location.href = '/process'}
+                className="border-blue-700 text-blue-300 hover:bg-blue-900/30 hover:text-white hover:border-blue-400 flex items-center gap-1 transition"
+                onClick={() => window.location.href = "/process"}
               >
                 查看处理流程
               </Button>
