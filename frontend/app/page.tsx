@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,46 +24,131 @@ const getHeatIndicator = (heat: number): string => {
   return '🔥';
 };
 
-const mockTopics = [
-  { id: "1", title: "全球经济复苏", description: "后疫情时代的经济复苏路径与政策协同作用。", status: "进行中", heat: 1234 },
-  { id: "2", title: "AI与人类共存", description: "AI在就业与社会结构的影响。", status: "AI分析中", heat: 987 },
-  { id: "3", title: "Web3隐私保护", description: "区块链在隐私保护与数据主权的应用。", status: "已结算", heat: 456 },
-  { id: "4", title: "数字货币监管", description: "全球范围内的数字货币监管政策差异。", status: "进行中", heat: 789 },
-  { id: "5", title: "元宇宙与虚拟经济", description: "虚拟经济体系与DAO商业模式创新。", status: "进行中", heat: 1120 },
-  { id: "6", title: "AI生成内容的版权归属", description: "AIGC 作品的法律与道德归属问题。", status: "AI分析中", heat: 654 },
+const getSupportRatio = (support: number, oppose: number) => {
+  const total = support + oppose;
+  return total === 0 ? 50 : (support / total) * 100;
+};
+
+const useAnimatedVotes = (support: number, oppose: number) => {
+  const [animatedSupport, setAnimatedSupport] = useState(support);
+  const [animatedOppose, setAnimatedOppose] = useState(oppose);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Generate small random fluctuations (up to ±5% of the original value)
+      const supportFluctuation = Math.floor(Math.random() * (support * 0.1)) - (support * 0.05);
+      const opposeFluctuation = Math.floor(Math.random() * (oppose * 0.1)) - (oppose * 0.05);
+      
+      setAnimatedSupport(Math.max(0, support + supportFluctuation));
+      setAnimatedOppose(Math.max(0, oppose + opposeFluctuation));
+    }, 2000); // Update every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [support, oppose]);
+
+  return { animatedSupport, animatedOppose };
+};
+
+interface Topic {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  heat: number;
+  support: number;
+  oppose: number;
+  animatedSupport?: number;
+  animatedOppose?: number;
+}
+
+const mockTopics: Topic[] = [
+  {
+    id: "1",
+    title: "特朗普“解放日”关税引发全球贸易震荡",
+    description: "2025年4月2日，美国总统特朗普宣布实施“解放日”关税政策，对大多数国家的进口商品征收10%的基础关税，并对特定商品如汽车和中国进口商品征收更高的关税。这一政策导致全球主要企业，如沃尔玛、Shein、福特和Target，纷纷表示将提高产品价格，以应对成本上升。",
+    status: "进行中",
+    heat: 1580,
+    support: 700,
+    oppose: 500,
+  },
+  {
+    id: "2",
+    title: "中美达成90天关税缓和协议，市场反应积极",
+    description: "在日内瓦举行的中美经贸会谈中，双方同意在未来90天内暂停部分高额关税的实施。美国将对中国商品的部分关税从34%下调至10%，而中国也相应地降低对美国产品的关税。这一举措被视为缓解贸易紧张局势的重要一步，市场对此反应积极。",
+    status: "已达成协议",
+    heat: 1320,
+    support: 850,
+    oppose: 300,
+  },
+  {
+    id: "3",
+    title: "全球企业应对美国新关税，调整供应链策略",
+    description: "面对美国新实施的关税政策，全球企业开始重新评估和调整其供应链策略。许多公司考虑将生产基地转移到关税影响较小的国家，以降低成本并保持竞争力。这一趋势可能对全球贸易格局产生深远影响。",
+    status: "调整中",
+    heat: 980,
+    support: 600,
+    oppose: 250,
+  },
+  {
+    id: "4",
+    title: "美国消费者面临价格上涨压力，通胀风险加剧",
+    description: "由于新关税政策的实施，美国消费者开始感受到价格上涨的压力。从日常用品到电子产品，多个领域的商品价格出现上涨趋势，增加了家庭的生活成本。经济学家警告，这可能加剧通胀风险，影响经济稳定。",
+    status: "关注中",
+    heat: 890,
+    support: 500,
+    oppose: 400,
+  },
+  {
+    id: "5",
+    title: "特朗普政府推动制造业回流，政策效果存疑",
+    description: "特朗普政府强调通过关税政策推动制造业回流美国，以增强国内经济。然而，专家指出，短期内制造业回流的效果有限，且可能导致国际贸易关系紧张，影响美国在全球市场的地位。",
+    status: "政策实施中",
+    heat: 1020,
+    support: 650,
+    oppose: 450,
+  },
+  {
+    id: "6",
+    title: "国际社会对美国单边关税政策表达关切",
+    description: "多个国家和国际组织对美国实施单边关税政策表示关切，认为这可能违反国际贸易规则，破坏多边贸易体系的稳定。呼吁美国与贸易伙伴通过对话解决争端，维护全球经济秩序。",
+    status: "外交磋商中",
+    heat: 760,
+    support: 400,
+    oppose: 500,
+  },
 ];
 
 const opinionPool = [
-  { content: "我觉得AI会催生很多我们以前想象不到的新职业。" },
-  { content: "说实话，Web3如果不能解决用户门槛，难以大规模普及。" },
-  { content: "其实经济复苏还要看全球各国的协作能否顺利。" },
-  { content: "元宇宙很酷，但我还没找到能真正吸引我的应用。" },
-  { content: "我身边好多人开始接触数字货币，但政策还不够明朗。" },
-  { content: "区块链的金融应用我挺看好，但普通人理解有难度。" },
-  { content: "我认为Web3的去中心化理想很棒，实现起来却挺难的。" },
-  { content: "最近关注AIGC，感觉未来创作者会越来越多元。" },
-  { content: "元宇宙游戏的经济系统让我想起了虚拟货币的那些年。" },
-  { content: "在我看来，Web3时代每个人都应该拥有数据主权。" },
-  { content: "NFT现在炒得很热，但我更关心它的实际场景。" },
-  { content: "智能合约如果能进法律行业，或许可以减少很多纠纷。" },
-  { content: "我很关心AI模型的可解释性，希望不是只会黑箱决策。" },
-  { content: "有时候我担心AIGC会让创意变得太同质化。" },
-  { content: "我支持加强对数字货币的监管，否则风险太大了。" },
-  { content: "大家都在谈Web3，但实际落地项目还是太少。" },
-  { content: "我希望未来元宇宙不只是换皮的社交软件。" },
-  { content: "区块链技术还得让普通用户用得更简单才行。" },
-  { content: "其实AI已经融入生活了，只是我们没意识到罢了。" },
-  { content: "我觉得数据隐私比什么都重要，希望别被滥用。" },
-  { content: "NFT收藏我玩过，但总觉得流动性有点问题。" },
-  { content: "Web3项目需要更好的用户体验设计，不然留不住人。" },
-  { content: "我经常担心AI的伦理边界，这很重要。" },
-  { content: "如果数字人民币普及了，现金可能会被彻底淘汰吧？" },
-  { content: "生成式AI太强大，有时候分不清真假内容。" },
-  { content: "我觉得DAO是个很有趣的组织方式，期待更多实践。" },
-  { content: "现在各种元宇宙平台太分散，希望有统一的入口。" },
-  { content: "AIGC作品的版权到底归谁？真的是大难题。" },
-  { content: "有时候担心Web3反而让骗子有了新机会，要谨慎。" },
-  { content: "如果AI能写歌、画画，那普通艺术家会怎样？" },
+  { content: "这波特朗普的关税真是让人无语，超市里价格涨得飞快，感觉钱包在流血。" },
+  { content: "作为一名小微企业主，新关税直接让我的进出口成本涨了20%，压力山大。" },
+  { content: "表面上是为了让制造业回流，但现实是转嫁到消费者身上，感觉被割韭菜了。" },
+  { content: "中美90天缓和协议算是喘口气，但谁知道后面又会不会反复折腾。" },
+  { content: "Shein 这些快时尚品牌受影响，买件衣服都比以前贵了一大截，真切体会到了。" },
+  { content: "听说沃尔玛也要涨价，普通家庭的日常开销真的顶不住了。" },
+  { content: "本来指望全球供应链优化点，结果关税政策一搞，反而越来越贵，恶性循环。" },
+  { content: "对小品牌冲击很大，大公司还能涨价，但小公司只能硬扛，要倒闭一批了。" },
+  { content: "政策听上去振奋人心，但制造业回流不是说回就能回，实际难度很大。" },
+  { content: "关税一涨，代购、海淘成本飞涨，消费者买单，体验越来越差。" },
+  { content: "身边搞外贸的朋友都在考虑转去东南亚建厂，避开美国这波政策风险。" },
+  { content: "特朗普想搞保护主义，结果只会让国际贸易更割裂，对大家都没好处。" },
+  { content: "作为消费者，我只关心一件事：我买的东西是不是又要涨价了？" },
+  { content: "说到底，这些关税还是普通人买单，表面打贸易战，实际影响民生。" },
+  { content: "中国降低了对美部分关税，感觉态度很克制，但局势依然不乐观。" },
+  { content: "通胀已经够夸张了，新关税政策简直是火上浇油，吃穿用都涨。" },
+  { content: "作为制造业从业者，想看到产业回流，但真不是靠加关税就能实现的。" },
+  { content: "希望各国能回归多边协作，单边主义只会让经济形势更糟糕。" },
+  { content: "这种短期政治操作，受伤的是老百姓，不是大资本。" },
+  { content: "关税反复拉扯下，企业信心越来越差，没人敢投长线了。" },
+  { content: "关税争端下，很多产品都开始涨价，消费能力跟不上，经济只会更冷。" },
+  { content: "国际社会的批评不无道理，美国这波政策太鲁莽了。" },
+  { content: "家里做外贸十几年了，这几年一波波关税政策，活下去越来越难了。" },
+  { content: "搞这种“拉一刀”的政策，真的能保护本土产业吗？我很怀疑。" },
+  { content: "我宁愿花点钱买质量好的进口货，也不希望因为政策被逼着买贵的烂货。" },
+  { content: "特朗普这次把全球供应链又搅了一遍，企业只能自救。" },
+  { content: "如果一直这么搞下去，美国本土消费者会是最终的买单人。" },
+  { content: "作为普通打工人，只希望别再无脑涨价了，已经买不起了。" },
+  { content: "与其加税，不如想办法提高本国生产力，这才是正道。" },
+  { content: "希望政策面多一些理性声音，别为了短期选票牺牲长期经济。" },
 ];
 
 const getRandomOpinion = () => {
@@ -82,12 +167,33 @@ const getRandomOpinion = () => {
 
 export default function HomePage() {
   const [userInput, setUserInput] = useState('');
-  const [opinions, setOpinions] = useState<Array<{
-    user: string;
-    content: string;
-    timestamp: string;
-    id: string;
-  }>>([]);
+  const [animatedTopics, setAnimatedTopics] = useState<Topic[]>(() => 
+    mockTopics.map(topic => ({
+      ...topic,
+      animatedSupport: topic.support,
+      animatedOppose: topic.oppose
+    }))
+  );
+  const [opinions, setOpinions] = useState<{ id: string; content: string; user: string; timestamp: string; }[]>([]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimatedTopics(prevTopics => 
+        prevTopics.map(topic => {
+          const supportFluctuation = Math.floor(Math.random() * (topic.support * 0.1)) - (topic.support * 0.05);
+          const opposeFluctuation = Math.floor(Math.random() * (topic.oppose * 0.1)) - (topic.oppose * 0.05);
+          
+          return {
+            ...topic,
+            animatedSupport: Math.max(0, topic.support + supportFluctuation),
+            animatedOppose: Math.max(0, topic.oppose + opposeFluctuation)
+          };
+        })
+      );
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const initialOpinions = [];
@@ -110,14 +216,12 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-900 overflow-hidden">
-      {/* 夜色背景气泡 */}
       <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
         <div className="absolute top-16 left-24 w-64 h-64 bg-emerald-900 rounded-full blur-3xl opacity-30 animate-pulse"></div>
         <div className="absolute bottom-16 right-24 w-96 h-72 bg-blue-900 rounded-full blur-3xl opacity-20"></div>
         <div className="absolute top-1/3 right-1/4 w-52 h-52 bg-pink-900 rounded-full blur-2xl opacity-15"></div>
       </div>
 
-      {/* 顶部导航 深色 */}
       <header className="w-full px-8 py-4 flex items-center justify-between bg-gray-950/90 backdrop-blur border-b border-gray-800 shadow-sm z-30 sticky top-0">
         <div className="flex items-center gap-2">
           <span className="text-blue-400 font-bold text-xl tracking-wide">MetaEmpire</span>
@@ -129,7 +233,7 @@ export default function HomePage() {
       <main className="flex min-h-[calc(100vh-64px)]">
         <div className="flex-1 p-6 overflow-y-auto">
           <motion.div
-            className="flex flex-col"
+            className="flex flex-col h-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}
@@ -147,16 +251,42 @@ export default function HomePage() {
 
             <div className="grid grid-cols-3 grid-rows-2 gap-5 h-[80vh]">
               <motion.div
-                className="col-span-2 row-span-1"
+                className="col-span-2 row-span-2"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
               >
                 {(() => {
-                  const styles = getTopicStyles(mockTopics[0].title);
+                  const topic = animatedTopics[0] || mockTopics[0];
+                  const styles = getTopicStyles(topic.title);
                   return (
-                    <Card className={`flex flex-col justify-between transition-all cursor-pointer border-2 ${styles.borderColor} ${styles.bgColor} shadow-md hover:shadow-xl hover:scale-[1.01] relative overflow-hidden group`}>
-                      <div className={`absolute top-0 left-0 w-1 h-full ${styles.bgColor} ${styles.borderColor}`}></div>
+                    <Card className={`h-full flex flex-col justify-between transition-all cursor-pointer border-2 ${styles.borderColor} ${styles.bgColor} shadow-md hover:shadow-xl hover:scale-[1.01] relative overflow-hidden group`}>
+                      <div className="absolute top-0 left-0 w-full h-10 flex items-center justify-between px-3">
+                        <div className="flex items-center text-red-400 text-sm font-medium">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                          </svg>
+                          {topic.animatedSupport || topic.support}
+                        </div>
+                        <div className="flex items-center text-blue-400 text-sm font-medium">
+                          {topic.animatedOppose || topic.oppose}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="absolute top-10 left-0 w-full h-1.5 flex bg-blue-500/30">
+                        <div 
+                          className="h-full bg-red-500 transition-all duration-300" 
+                          style={{ 
+                            width: `${getSupportRatio(
+                              topic.animatedSupport || topic.support, 
+                              topic.animatedOppose || topic.oppose
+                            )}%` 
+                          }} 
+                        />
+                      </div>
+                      <div className={`absolute top-1.5 left-0 w-1 h-[calc(100%-0.375rem)] ${styles.bgColor} ${styles.borderColor}`}></div>
                       <div className="absolute bottom-0 right-0 w-48 h-48 bg-gradient-to-tr from-white/0 to-gray-500/30 rounded-full blur-3xl opacity-20 group-hover:opacity-35 transition-opacity"></div>
                       <CardContent className="p-6 relative z-10">
                         <div className="flex items-center justify-between mb-4">
@@ -177,7 +307,7 @@ export default function HomePage() {
                 })()}
               </motion.div>
 
-              {mockTopics.slice(1, 3).map((topic, idx) => {
+              {animatedTopics.slice(1, 3).map((topic, idx) => {
                 const styles = getTopicStyles(topic.title);
                 return (
                   <motion.div
@@ -186,8 +316,29 @@ export default function HomePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 + idx * 0.1 }}
                   >
-                    <Card className={`flex flex-col justify-between hover:shadow-lg transition cursor-pointer border ${styles.borderColor} ${styles.bgColor}`}>
-                      <CardContent className="p-4">
+                    <Card className={`h-full flex flex-col justify-between hover:shadow-lg transition cursor-pointer border ${styles.borderColor} ${styles.bgColor} relative overflow-hidden`}>
+                      <div className="absolute top-0 left-0 w-full h-8 flex items-center justify-between px-2">
+                        <div className="flex items-center text-red-400 text-sm font-medium">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                          </svg>
+                          {topic.support}
+                        </div>
+                        <div className="flex items-center text-blue-400 text-sm font-medium">
+                          {topic.oppose}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="absolute top-8 left-0 w-full h-1.5 flex bg-blue-500/30">
+                        <div 
+                          className="h-full bg-red-500 transition-all duration-300" 
+                          style={{ width: `${getSupportRatio(topic.support, topic.oppose)}%` }} 
+                        />
+                      </div>
+                      <div className={`absolute top-1.5 left-0 w-1 h-[calc(100%-0.375rem)] ${styles.bgColor} ${styles.borderColor}`}></div>
+                      <CardContent className="p-4 pt-6">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-1">
                             <span className="text-lg">{styles.icon}</span>
@@ -206,17 +357,38 @@ export default function HomePage() {
                 );
               })}
 
-              {mockTopics.slice(3, 6).map((topic, idx) => {
+              {animatedTopics.slice(3, 6).map((topic, idx) => {
                 const styles = getTopicStyles(topic.title);
                 return (
                   <motion.div
                     key={topic.id}
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7 + idx * 0.1 }}
+                    transition={{ duration: 0.5 + idx * 0.1 }}
                   >
-                    <Card className={`flex flex-col justify-between hover:shadow-lg transition cursor-pointer border ${styles.borderColor} ${styles.bgColor}`}>
-                      <CardContent className="p-4">
+                    <Card className={`flex flex-col justify-between hover:shadow-lg transition cursor-pointer border ${styles.borderColor} ${styles.bgColor} relative overflow-hidden`}>
+                      <div className="absolute top-0 left-0 w-full h-8 flex items-center justify-between px-2">
+                        <div className="flex items-center text-red-400 text-sm font-medium">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                          </svg>
+                          {topic.support}
+                        </div>
+                        <div className="flex items-center text-blue-400 text-sm font-medium">
+                          {topic.oppose}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="absolute top-8 left-0 w-full h-1.5 flex bg-blue-500/30">
+                        <div 
+                          className="h-full bg-red-500 transition-all duration-300" 
+                          style={{ width: `${getSupportRatio(topic.support, topic.oppose)}%` }} 
+                        />
+                      </div>
+                      <div className={`absolute top-1.5 left-0 w-1 h-[calc(100%-0.375rem)] ${styles.bgColor} ${styles.borderColor}`}></div>
+                      <CardContent className="p-4 pt-6">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-1">
                             <span className="text-lg">{styles.icon}</span>
