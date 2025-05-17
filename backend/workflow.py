@@ -2,7 +2,7 @@ import uuid
 import time
 import logging
 from typing import Dict, List, Optional
-from analysis import integrate_opinions, analyze_topics_and_sentiment, generate_summary_and_recommendation
+from analysis import integrate_opinions, analyze_topics_and_sentiment, generate_summary, generate_recommendation
 import asyncio
 from pydantic import BaseModel
 
@@ -203,15 +203,12 @@ class WorkflowManager:
                 1
             )
             
-            summary = await generate_summary_and_recommendation(integration_result)
-
-            key_topics = [word for word in ["监管", "创新", "安全", "发展", "技术", "应用", "风险", "机遇"] if word in summary.lower()]
-            
+            summary = await generate_summary(integration_result)     
             await WorkflowManager._update_with_delay(
                 task_id,
                 "ai_summarizing",
                 "complete",
-                summary[:100] + "...",
+                summary,
                 0.5
             )
             
@@ -223,9 +220,7 @@ class WorkflowManager:
                 1
             )
 
-            parts = summary.split("\n\n")
-            recommendations = parts[-1] if len(parts) > 1 else ""
-            
+            recommendations = await generate_recommendation(integration_result)
             await WorkflowManager._update_with_delay(
                 task_id,
                 "ai_recommendation",
