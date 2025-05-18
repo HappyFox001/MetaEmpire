@@ -22,6 +22,12 @@ MetaEmpire 是一个结合区块链、人工智能与Web3哲学的数字治理�
   </a>
 </p>
 
+<p align="center">
+  <a href="https://www.canva.cn/design/DAGnwEl6_WM/CPPwGu0k1LUJWtiYwH9EhQ/edit?utm_content=DAGnwEl6_WM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton">
+    <img src="https://img.shields.io/badge/📊 查看PPT演示-MetaEmpire-green?style=for-the-badge" alt="MetaEmpire Pitch Deck">
+  </a>
+</p>
+
 ---
 
 ## 🚀 核心特性
