@@ -617,7 +617,7 @@ MetaEmpire的宏伟愿景，绝非仅凭少数人的努力就能实现。它需�
 - 帝国君主Agent 0
 - Treap
   - email: treaptreap123@gmail.com
-- 
-  - email: 
+- fox
+  - email: qianzhang.happyfox@gmail.com
 
 Repo: https://github.com/HappyFox001/MetaEmpire
